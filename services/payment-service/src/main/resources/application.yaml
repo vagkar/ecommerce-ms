@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: payment-service
+
+  kafka:
+    bootstrap-servers: localhost:29092
+    listener:
+      missing-topics-fatal: false
+    consumer:
+      group-id: payment-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.ecommerce
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.ecommerce.payment.messaging.OrderCreatedEvent
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+
+server:
+  port: 8083
+
+app:
+  kafka:
+    topics:
+      payment-succeeded: payment.succeeded
+      payment-failed: payment.failed

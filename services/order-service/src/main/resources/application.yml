@@ -1,0 +1,35 @@
+spring:
+    application:
+        name: order-service
+
+    datasource:
+        url: jdbc:postgresql://localhost:5432/orderdb
+        username: order
+        password: order
+
+    jpa:
+        hibernate:
+            ddl-auto: update
+        open-in-view: false
+
+    kafka:
+        bootstrap-servers: localhost:29092
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+
+server:
+    port: 8082
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health,info
+
+app:
+    product-service:
+        base-url: http://localhost:8081
+    kafka:
+        topics:
+            order-events: order.events

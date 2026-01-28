@@ -1,0 +1,18 @@
+# IntelliJ
+.idea/
+*.iml
+
+# Maven build outputs
+**/target/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+**/*.log
+
+# Secrets / local overrides
+**/.env
+**/application-local.yml
+**/application-local.properties
