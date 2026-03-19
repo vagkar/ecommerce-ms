@@ -3,6 +3,7 @@ package com.ecommerce.product.service;
 import com.ecommerce.product.dto.CreateProductRequest;
 import com.ecommerce.product.dto.UpdateProductRequest;
 import com.ecommerce.product.entity.Product;
+import com.ecommerce.product.exception.EntityNotFoundException;
 import com.ecommerce.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class ProductService {
 
     public Product get(UUID id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product with ID " + id + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Product", id));
     }
 
     @Transactional
