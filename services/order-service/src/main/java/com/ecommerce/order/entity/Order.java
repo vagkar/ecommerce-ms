@@ -48,6 +48,10 @@ public class Order {
         recalculateTotal();
     }
 
+    public void updateStatus(OrderStatus status) {
+        this.status = status;
+    }
+
     private void recalculateTotal() {
         this.total = items.stream()
                 .map(OrderItem::getLineTotal)

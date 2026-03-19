@@ -3,11 +3,13 @@ package com.ecommerce.order.service;
 import com.ecommerce.order.client.ProductClient;
 import com.ecommerce.order.dto.CreateOrderRequest;
 import com.ecommerce.order.entity.Order;
+import com.ecommerce.order.entity.OrderStatus;
 import com.ecommerce.order.messaging.OrderCreatedEvent;
 import com.ecommerce.order.messaging.OrderEventPublisher;
 import com.ecommerce.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -36,5 +38,14 @@ public class OrderService {
 
     public Order get(UUID id) {
         return orderRepository.findById(id).orElseThrow();
+    }
+}
+
+    @Transactional
+    public void updateOrderStatus(UUID orderId, OrderStatus status) {
+        var order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order", orderId));
+        order.updateStatus(status);
+        orderRepository.save(order);
     }
 }

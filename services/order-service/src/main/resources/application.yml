@@ -17,6 +17,14 @@ spring:
         producer:
             key-serializer: org.apache.kafka.common.serialization.StringSerializer
             value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+        consumer:
+            group-id: order-service-payment
+            auto-offset-reset: earliest
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+            properties:
+                spring.json.trusted.packages: "com.ecommerce"
+                spring.json.type.mapping: "com.ecommerce.payment.messaging.PaymentSucceededEvent:com.ecommerce.order.messaging.PaymentSucceededEvent,com.ecommerce.payment.messaging.PaymentFailedEvent:com.ecommerce.order.messaging.PaymentFailedEvent"
 
 server:
     port: 8082
@@ -33,3 +41,5 @@ app:
     kafka:
         topics:
             order-events: order.events
+            payment-succeeded: payment.succeeded
+            payment-failed: payment.failed
