@@ -7,6 +7,8 @@ import com.ecommerce.order.entity.Order;
 import com.ecommerce.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +30,11 @@ public class OrderController {
     @GetMapping("/{id}")
     public OrderResponse get(@PathVariable UUID id) {
         return toResponse(orderService.get(id));
+    }
+
+    @GetMapping
+    public Page<OrderResponse> getByUser(@RequestParam UUID userId, Pageable pageable) {
+        return orderService.getByUserId(userId, pageable).map(this::toResponse);
     }
 
     private OrderResponse toResponse(Order order) {

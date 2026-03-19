@@ -1,10 +1,12 @@
 package com.ecommerce.product.service;
 
 import com.ecommerce.product.dto.CreateProductRequest;
+import com.ecommerce.product.dto.UpdateProductRequest;
 import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,5 +31,20 @@ public class ProductService {
     public Product get(UUID id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product with ID " + id + " not found."));
+    }
+
+    @Transactional
+    public Product update(UUID id, UpdateProductRequest request) {
+        var product = get(id);
+        product.rename(request.name());
+        product.changePrice(request.price());
+        return productRepository.save(product);
+    }
+
+    @Transactional
+    public void deactivate(UUID id) {
+        var product = get(id);
+        product.deactivate();
+        productRepository.save(product);
     }
 }

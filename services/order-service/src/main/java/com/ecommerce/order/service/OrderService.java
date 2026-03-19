@@ -8,6 +8,8 @@ import com.ecommerce.order.messaging.OrderCreatedEvent;
 import com.ecommerce.order.messaging.OrderEventPublisher;
 import com.ecommerce.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +41,10 @@ public class OrderService {
     public Order get(UUID id) {
         return orderRepository.findById(id).orElseThrow();
     }
-}
+
+    public Page<Order> getByUserId(UUID userId, Pageable pageable) {
+        return orderRepository.findByUserId(userId, pageable);
+    }
 
     @Transactional
     public void updateOrderStatus(UUID orderId, OrderStatus status) {

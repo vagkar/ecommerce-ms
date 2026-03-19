@@ -2,6 +2,7 @@ package com.ecommerce.product.controller;
 
 import com.ecommerce.product.dto.CreateProductRequest;
 import com.ecommerce.product.dto.ProductResponse;
+import com.ecommerce.product.dto.UpdateProductRequest;
 import com.ecommerce.product.entity.Product;
 import com.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -35,6 +36,17 @@ public class ProductController {
         return productService.list().stream().map(this::toResponse).toList();
     }
 
+    @PutMapping("/{id}")
+    public ProductResponse update(@PathVariable UUID id, @RequestBody @Valid UpdateProductRequest request) {
+        return toResponse(productService.update(id, request));
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deactivate(@PathVariable UUID id) {
+        productService.deactivate(id);
+    }
+
     private ProductResponse toResponse(Product product) {
         return new ProductResponse(
                 product.getId(),
@@ -44,5 +56,4 @@ public class ProductController {
                 product.isActive()
         );
     }
-
 }
