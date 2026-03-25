@@ -74,6 +74,7 @@ POST /orders (order-service) — requires JWT in Authorization header
       → Publishes PaymentSucceededEvent → payment.succeeded
          OR PaymentFailedEvent → payment.failed
       → order-service consumes result → updates order status (PAID / PAYMENT_FAILED)
+      → order-service broadcasts status via WebSocket → /topic/orders/{orderId}
 ```
 
 ### Authentication Flow
@@ -102,7 +103,9 @@ POST /orders (order-service) — requires JWT in Authorization header
 | order-service | `JwtAuthFilter` | Validates JWT on every request |
 | order-service | `ProductClient` | `RestClient` wrapper calling product-service |
 | order-service | `OrderEventPublisher` | Publishes `OrderCreatedEvent` to `order.events` |
-| order-service | `PaymentEventsListener` | `@KafkaListener` on `payment.succeeded` + `payment.failed` |
+| order-service | `PaymentEventsListener` | `@KafkaListener` on `payment.succeeded` + `payment.failed`, triggers WebSocket broadcast |
+| order-service | `WebSocketConfig` | STOMP endpoint `/ws`, topic prefix `/topic` |
+| order-service | `OrderStatusBroadcaster` | Broadcasts order status to `/topic/orders/{orderId}` via `SimpMessagingTemplate` |
 | payment-service | `OrderEventsListener` | `@KafkaListener` on `order.events`, consumer group `payment-service` |
 | payment-service | `PaymentEventPublisher` | Publishes succeeded/failed events |
 | product-service | `JwtAuthFilter` | Validates JWT on every request |
@@ -139,3 +142,4 @@ Standard packages per service:
 - `config` — Spring configuration (Security, CORS, etc.)
 - `security` — JWT filter
 - `exception` — custom exceptions + global handler
+- `websocket` — WebSocket config + broadcaster (order-service only)

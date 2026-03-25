@@ -200,6 +200,6 @@ All sensitive values are configured via environment variables with local default
 - [x] JWT validation filter in order-service and product-service
 - [x] Environment variable configuration
 - [ ] Vue.js frontend (products, cart, orders)
-- [ ] WebSocket real-time order status updates
+- [x] WebSocket real-time order status updates (STOMP `/ws`, broadcasts to `/topic/orders/{id}`)
 - [ ] Full Docker Compose (all services + frontend)
 - [ ] Tests (unit, web layer, Kafka integration)
