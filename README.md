@@ -1,54 +1,64 @@
 # ecommerce-ms — Spring Boot Microservices + Kafka
 
-Full-stack e-commerce system built as a portfolio project. Event-driven architecture with three Spring Boot microservices communicating via Kafka, and a Vue.js frontend (in progress).
+Full-stack e-commerce system built as a portfolio project. Event-driven architecture with four Spring Boot microservices communicating via Kafka, JWT authentication, and a Vue.js frontend (in progress).
 
 ## Architecture
 
 ```
-Vue.js Frontend (port 5173)
-        │
-        ▼
-┌───────────────────┐     REST      ┌────────────────────┐
-│   order-service   │ ────────────► │  product-service   │
-│     (port 8082)   │               │    (port 8081)     │
-└───────────────────┘               └────────────────────┘
-        │
-        │ Kafka: order.events
-        ▼
-┌───────────────────┐
-│  payment-service  │
-│    (port 8083)    │
-└───────────────────┘
-        │
-        ├── Kafka: payment.succeeded ──┐
-        └── Kafka: payment.failed ─────┤
-                                       ▼
-                              order-service updates
-                              order status (PAID /
-                              PAYMENT_FAILED)
+                    Vue.js Frontend (port 5173)
+                 /           |              \
+   login/register    Bearer token      Bearer token
+               /             |                \
+              ▼              ▼                 ▼
+┌──────────────────┐  ┌───────────────┐  ┌────────────────┐
+│  user-service    │  │ order-service │  │product-service │
+│  (port 8084)     │  │  (port 8082)  │  │  (port 8081)   │
+└──────────────────┘  └───────────────┘  └────────────────┘
+  issues JWT token            │   REST GET /products/{id}  ▲
+                              │ ──────────────────────────►│
+                              │ Kafka: order.events
+                              ▼
+                    ┌───────────────────┐
+                    │  payment-service  │
+                    │    (port 8083)    │
+                    └───────────────────┘
+                              │
+                 ─────────────┴─────────────
+                 │                          │
+      Kafka: payment.succeeded    Kafka: payment.failed
+                 └──────────────┬───────────┘
+                                ▼
+                       order-service updates
+                       order status (PAID /
+                       PAYMENT_FAILED)
 ```
 
 ### Event Flow
 
-1. `POST /orders` — order-service validates product via REST call to product-service
-2. Order saved to DB with status `CREATED`
-3. `OrderCreatedEvent` published to Kafka topic `order.events`
-4. payment-service consumes the event, simulates payment (80% success)
-5. `PaymentSucceededEvent` or `PaymentFailedEvent` published to Kafka
-6. order-service consumes the payment result and updates order status to `PAID` or `PAYMENT_FAILED`
+1. `POST /auth/login` — user-service validates credentials, returns JWT token
+2. `POST /orders` — client sends JWT in `Authorization` header
+3. order-service validates the token and extracts `userId`
+4. order-service validates product via REST call to product-service
+5. Order saved to DB with status `CREATED`
+6. `OrderCreatedEvent` published to Kafka topic `order.events`
+7. payment-service consumes the event, simulates payment (80% success)
+8. `PaymentSucceededEvent` or `PaymentFailedEvent` published to Kafka
+9. order-service consumes the payment result and updates order status to `PAID` or `PAYMENT_FAILED`
 
 ## Services & Ports
 
-| Service         | Port | Purpose                                      |
-|----------------|-----:|----------------------------------------------|
-| product-service | 8081 | Products REST API + PostgreSQL               |
-| order-service   | 8082 | Orders REST API + PostgreSQL + Kafka         |
-| payment-service | 8083 | Kafka consumer/producer — mock payments      |
-| kafka-ui        | 8080 | Kafka UI dashboard                           |
+| Service         | Port | Purpose                                           |
+|----------------|-----:|---------------------------------------------------|
+| product-service | 8081 | Products REST API + PostgreSQL                    |
+| order-service   | 8082 | Orders REST API + PostgreSQL + Kafka              |
+| payment-service | 8083 | Kafka consumer/producer — mock payments           |
+| user-service    | 8084 | Authentication — register, login, JWT issuance    |
+| kafka-ui        | 8080 | Kafka UI dashboard                                |
 
 ## Tech Stack
 
-- **Backend:** Java 25, Spring Boot 4.0.1, Spring Data JPA, Spring Kafka
+- **Backend:** Java 25, Spring Boot 4.0.1, Spring Data JPA, Spring Security, Spring Kafka
+- **Auth:** JWT (jjwt 0.12.6), BCrypt password hashing
 - **Frontend:** Vue 3, TypeScript, Vite, Pinia, Vue Router, Tailwind CSS, PrimeVue _(in progress)_
 - **Database:** PostgreSQL (one DB per service)
 - **Messaging:** Apache Kafka 3.7.0
@@ -56,23 +66,30 @@ Vue.js Frontend (port 5173)
 
 ## API Endpoints
 
+### user-service (port 8084) — public
+
+| Method | Path             | Description                        |
+|--------|------------------|------------------------------------|
+| `POST` | `/auth/register` | Register — returns JWT token       |
+| `POST` | `/auth/login`    | Login — returns JWT token          |
+
 ### product-service (port 8081)
 
-| Method  | Path                        | Description              |
-|---------|-----------------------------|--------------------------|
-| `GET`   | `/products`                 | List all products        |
-| `GET`   | `/products/{id}`            | Get product by ID        |
-| `POST`  | `/products`                 | Create product           |
-| `PUT`   | `/products/{id}`            | Update name and price    |
-| `PATCH` | `/products/{id}/deactivate` | Deactivate product       |
+| Method  | Path                        | Auth     | Description           |
+|---------|-----------------------------|----------|-----------------------|
+| `GET`   | `/products`                 | public   | List all products     |
+| `GET`   | `/products/{id}`            | public   | Get product by ID     |
+| `POST`  | `/products`                 | required | Create product        |
+| `PUT`   | `/products/{id}`            | required | Update name and price |
+| `PATCH` | `/products/{id}/deactivate` | required | Deactivate product    |
 
-### order-service (port 8082)
+### order-service (port 8082) — all endpoints require JWT
 
-| Method | Path              | Description                        |
-|--------|-------------------|------------------------------------|
-| `GET`  | `/orders/{id}`    | Get order by ID                    |
-| `GET`  | `/orders?userId=` | List orders for a user (paginated) |
-| `POST` | `/orders`         | Create order                       |
+| Method | Path           | Description                        |
+|--------|----------------|------------------------------------|
+| `POST` | `/orders`      | Create order (userId from token)   |
+| `GET`  | `/orders/{id}` | Get order by ID                    |
+| `GET`  | `/orders`      | List own orders (paginated)        |
 
 ## Getting Started
 
@@ -87,10 +104,11 @@ Vue.js Frontend (port 5173)
 
 Create the following PostgreSQL databases before starting:
 
-| Database   | User      | Password  |
-|------------|-----------|-----------|
+| Database    | User      | Password  |
+|-------------|-----------|-----------|
 | `productdb` | `product` | `product` |
 | `orderdb`   | `order`   | `order`   |
+| `userdb`    | `user`    | `user`    |
 
 Hibernate auto-creates the schema on first startup (`ddl-auto: update`).
 
@@ -106,6 +124,7 @@ Kafka UI available at http://localhost:8080
 
 ```bash
 # In separate terminals
+./mvnw -f services/user-service spring-boot:run
 ./mvnw -f services/product-service spring-boot:run
 ./mvnw -f services/order-service spring-boot:run
 ./mvnw -f services/payment-service spring-boot:run
@@ -114,20 +133,47 @@ Kafka UI available at http://localhost:8080
 ### 3. Try It Out
 
 ```bash
-# Create a product
+# Register
+curl -X POST http://localhost:8084/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"123456"}'
+
+# Login (keep the token from the response)
+curl -X POST http://localhost:8084/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"123456"}'
+
+# Create a product (requires token)
 curl -X POST http://localhost:8081/products \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
   -d '{"sku":"LAPTOP-01","name":"Laptop Pro","price":999.99}'
 
 # Create an order (replace <product-id> with the id returned above)
 curl -X POST http://localhost:8082/orders \
   -H "Content-Type: application/json" \
-  -d '{"userId":"00000000-0000-0000-0000-000000000001","items":[{"productId":"<product-id>","quantity":1}]}'
+  -H "Authorization: Bearer <token>" \
+  -d '{"items":[{"productId":"<product-id>","quantity":1}]}'
 
 # After ~1-2 seconds, check the order status
-curl http://localhost:8082/orders/<order-id>
+curl http://localhost:8082/orders/<order-id> \
+  -H "Authorization: Bearer <token>"
 # "status" will be "PAID" or "PAYMENT_FAILED"
 ```
+
+## Configuration
+
+All sensitive values are configured via environment variables with local defaults:
+
+| Variable                  | Default                        | Used by                    |
+|---------------------------|--------------------------------|----------------------------|
+| `DB_URL`                  | service-specific localhost URL | product, order, user       |
+| `DB_USERNAME`             | service-specific username      | product, order, user       |
+| `DB_PASSWORD`             | service-specific password      | product, order, user       |
+| `JWT_SECRET`              | development key                | product, order, user       |
+| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:29092`              | order, payment             |
+| `PRODUCT_SERVICE_URL`     | `http://localhost:8081`        | order                      |
+| `JWT_EXPIRATION_MS`       | `86400000` (24h)               | user                       |
 
 ## Build Commands
 
@@ -150,8 +196,10 @@ curl http://localhost:8082/orders/<order-id>
 - [x] Payment feedback loop — order status updated from payment events
 - [x] Global exception handling with proper HTTP status codes
 - [x] CORS configuration for Vue frontend
+- [x] JWT authentication — user-service with register/login
+- [x] JWT validation filter in order-service and product-service
+- [x] Environment variable configuration
 - [ ] Vue.js frontend (products, cart, orders)
-- [ ] JWT authentication (user-service)
 - [ ] WebSocket real-time order status updates
 - [ ] Full Docker Compose (all services + frontend)
 - [ ] Tests (unit, web layer, Kafka integration)
