@@ -24,8 +24,8 @@ public class OrderService {
     private final ProductClient productClient;
     private final OrderEventPublisher orderEventPublisher;
 
-    public Order create(CreateOrderRequest request) {
-        var order = Order.create(request.userId());
+    public Order create(CreateOrderRequest request, UUID userId) {
+        var order = Order.create(userId);
 
         for (var item : request.items()) {
             var product = productClient.getProduct(item.productId());

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -23,8 +24,10 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponse create(@RequestBody @Valid CreateOrderRequest request) {
-        return toResponse(orderService.create(request));
+    public OrderResponse create(@RequestBody @Valid CreateOrderRequest request,
+                                Authentication authentication) {
+        var userId = UUID.fromString((String) authentication.getPrincipal());
+        return toResponse(orderService.create(request, userId));
     }
 
     @GetMapping("/{id}")
@@ -33,7 +36,8 @@ public class OrderController {
     }
 
     @GetMapping
-    public Page<OrderResponse> getByUser(@RequestParam UUID userId, Pageable pageable) {
+    public Page<OrderResponse> getByUser(Authentication authentication, Pageable pageable) {
+        var userId = UUID.fromString((String) authentication.getPrincipal());
         return orderService.getByUserId(userId, pageable).map(this::toResponse);
     }
 
