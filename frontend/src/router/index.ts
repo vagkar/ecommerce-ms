@@ -44,9 +44,10 @@ const router = createRouter({
 })
 
 // Navigation guard — redirect to login if route requires auth and no token exists
+// Saves the intended destination as ?redirect= so login can send the user back
 router.beforeEach((to) => {
   if (to.meta.requiresAuth && !localStorage.getItem('token')) {
-    return { name: 'login' }
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
 })
 

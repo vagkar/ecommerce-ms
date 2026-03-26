@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
@@ -12,7 +13,8 @@ const password = ref('')
 async function handleLogin() {
   try {
     await authStore.login({ email: email.value, password: password.value })
-    router.push('/products')
+    const redirect = (route.query.redirect as string) || '/products'
+    router.push(redirect)
   } catch {
     // error is already in authStore.error
   }
