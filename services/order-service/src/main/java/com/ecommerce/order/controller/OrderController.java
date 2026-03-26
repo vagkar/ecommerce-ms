@@ -43,7 +43,7 @@ public class OrderController {
 
     private OrderResponse toResponse(Order order) {
         var items = order.getItems().stream()
-                .map(i -> new OrderItemResponse(i.getProductId(), i.getQuantity(), i.getUnitPrice(), i.getLineTotal()))
+                .map(i -> new OrderItemResponse(i.getProductId(), i.getProductName(), i.getQuantity(), i.getUnitPrice(), i.getLineTotal()))
                 .toList();
         return new OrderResponse(order.getId(), order.getUserId(), order.getStatus().name(), order.getTotal(), items);
     }

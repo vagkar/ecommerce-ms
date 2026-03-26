@@ -59,7 +59,7 @@ onMounted(async () => {
       <h2>Items</h2>
       <div class="items-list">
         <div v-for="item in order.items" :key="item.productId" class="item-row">
-          <span>{{ item.productId.slice(0, 8) }}...</span>
+          <span>{{ item.productName }}</span>
           <span>€{{ item.unitPrice.toFixed(2) }} × {{ item.quantity }}</span>
           <span class="item-price">€{{ item.lineTotal.toFixed(2) }}</span>
         </div>

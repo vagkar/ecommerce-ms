@@ -9,6 +9,7 @@ export interface Product {
 // Maps to OrderItemResponse DTO
 export interface OrderItem {
   productId: string
+  productName: string
   quantity: number
   unitPrice: number
   lineTotal: number

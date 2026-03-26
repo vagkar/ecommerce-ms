@@ -42,8 +42,8 @@ public class Order {
         return order;
     }
 
-    public void addItem(UUID productId, int quantity, BigDecimal unitPrice) {
-        var item = new OrderItem(this, productId, quantity, unitPrice);
+    public void addItem(UUID productId, String productName, int quantity, BigDecimal unitPrice) {
+        var item = new OrderItem(this, productId, productName, quantity, unitPrice);
         items.add(item);
         recalculateTotal();
     }

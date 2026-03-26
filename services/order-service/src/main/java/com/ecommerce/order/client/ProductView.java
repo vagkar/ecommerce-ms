@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record ProductView(
         UUID id,
+        String name,
         BigDecimal price,
         boolean active
 ) {}

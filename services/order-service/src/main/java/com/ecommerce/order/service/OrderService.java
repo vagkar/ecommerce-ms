@@ -32,7 +32,7 @@ public class OrderService {
             if (product == null || !product.active()) {
                 throw new IllegalArgumentException("Product is not available: " + item.productId());
             }
-            order.addItem(item.productId(), item.quantity(), product.price());
+            order.addItem(item.productId(), product.name(), item.quantity(), product.price());
         }
         var savedOrder = orderRepository.save(order);
         orderEventPublisher.publish(new OrderCreatedEvent(savedOrder.getId(), savedOrder.getUserId(), savedOrder.getTotal()));

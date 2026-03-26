@@ -26,6 +26,9 @@ public class OrderItem {
     private UUID productId;
 
     @Column(nullable = false)
+    private String productName;
+
+    @Column(nullable = false)
     private int quantity;
 
     @Column(nullable = false, precision = 12, scale = 2)
@@ -34,9 +37,10 @@ public class OrderItem {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal lineTotal;
 
-    public OrderItem(Order order, UUID productId, int quantity, BigDecimal unitPrice) {
+    public OrderItem(Order order, UUID productId, String productName, int quantity, BigDecimal unitPrice) {
         this.order = order;
         this.productId = productId;
+        this.productName = productName;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
         this.lineTotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
