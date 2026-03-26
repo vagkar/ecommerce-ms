@@ -203,5 +203,10 @@ All sensitive values are configured via environment variables with local default
 - [x] Environment variable configuration
 - [x] Vue.js frontend (products, cart, orders, live order status via WebSocket)
 - [x] WebSocket real-time order status updates (STOMP `/ws`, broadcasts to `/topic/orders/{id}`)
+- [x] Product names stored in order items (snapshot at order time)
+- [x] Login redirect to intended page after authentication
+- [x] Cart persistence via localStorage
+- [x] WebSocket auto-reconnect with connection indicator
+- [ ] Pagination UI for orders list
 - [ ] Full Docker Compose (all services + frontend)
 - [ ] Tests (unit, web layer, Kafka integration)

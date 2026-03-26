@@ -177,11 +177,19 @@ src/
 |---|---|
 | `api/axios.ts` | Axios instances with JWT interceptor |
 | `stores/authStore.ts` | JWT token, login/logout, localStorage persistence |
-| `stores/cartStore.ts` | Cart items, add/remove, computed totals |
+| `stores/cartStore.ts` | Cart items, add/remove, computed totals, localStorage persistence |
 | `stores/orderStore.ts` | Orders list, place order, status updates |
-| `composables/useOrderStatus.ts` | STOMP WebSocket subscription per order |
-| `router/index.ts` | Routes + `beforeEach` auth guard |
+| `composables/useOrderStatus.ts` | STOMP WebSocket subscription per order (auto-reconnect) |
+| `router/index.ts` | Routes + `beforeEach` auth guard (saves redirect destination) |
 | `types/index.ts` | TypeScript interfaces (must match backend DTOs exactly) |
+
+### Key Frontend Behaviors
+
+- **Cart persistence:** `cartStore` uses `watch` with `deep: true` to sync cart items to `localStorage` on every change
+- **Login redirect:** Router guard saves the intended destination as `?redirect=` query param; `LoginView`/`RegisterView` redirect back after auth
+- **Order items:** `OrderItem` entity stores `productName` as a snapshot at order time (not looked up from product-service)
+- **Live status in list:** `OrdersView` opens a single STOMP connection and subscribes to all CREATED orders for live status updates
+- **GET /orders** returns Spring `Page<OrderResponse>` — frontend reads `response.data.content` (not `response.data` directly)
 
 ### CORS
 
