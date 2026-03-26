@@ -11,7 +11,7 @@ Portfolio/learning project implementing an event-driven e-commerce system with f
 - **payment-service** (port 8083) — mock payment processing, Kafka consumer/producer only (no DB, no REST)
 - **user-service** (port 8084) — JWT authentication, register/login, PostgreSQL (`userdb`)
 
-Tech stack: Java 25, Spring Boot 4.0.1, Spring Security, PostgreSQL, Apache Kafka 3.7.0, Maven, Lombok, jjwt 0.12.6.
+Tech stack: Java 25, Spring Boot 4.0.1, Spring Security, PostgreSQL, Apache Kafka 3.7.0, Maven, Lombok, jjwt 0.12.6, Vue 3, TypeScript, Vite, Pinia, Vue Router, Axios.
 
 ## Commands
 
@@ -143,3 +143,48 @@ Standard packages per service:
 - `security` — JWT filter
 - `exception` — custom exceptions + global handler
 - `websocket` — WebSocket config + broadcaster (order-service only)
+
+## Frontend (`frontend/`)
+
+Vue 3 + TypeScript SPA. Dev server: `http://localhost:5173`.
+
+### Commands
+
+```bash
+cd frontend
+npm install
+npm run dev       # start dev server
+npm run lint      # lint + fix
+npm run build     # production build
+```
+
+### Frontend Structure
+
+```
+src/
+  api/          — Axios HTTP clients (one per backend service)
+  stores/       — Pinia state management (auth, cart, order)
+  composables/  — Reusable logic (useOrderStatus for WebSocket)
+  views/        — Page components (one per route)
+  components/   — Reusable UI components
+  router/       — Vue Router with auth navigation guards
+  types/        — TypeScript interfaces matching backend DTOs
+```
+
+### Key Frontend Files
+
+| File | Role |
+|---|---|
+| `api/axios.ts` | Axios instances with JWT interceptor |
+| `stores/authStore.ts` | JWT token, login/logout, localStorage persistence |
+| `stores/cartStore.ts` | Cart items, add/remove, computed totals |
+| `stores/orderStore.ts` | Orders list, place order, status updates |
+| `composables/useOrderStatus.ts` | STOMP WebSocket subscription per order |
+| `router/index.ts` | Routes + `beforeEach` auth guard |
+| `types/index.ts` | TypeScript interfaces (must match backend DTOs exactly) |
+
+### CORS
+
+All three backend services (user, product, order) have:
+- `CorsConfig.java` — allows `http://localhost:5173`
+- `.cors(Customizer.withDefaults())` in SecurityConfig — lets preflight OPTIONS pass before auth check

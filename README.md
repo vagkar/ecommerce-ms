@@ -44,6 +44,8 @@ Full-stack e-commerce system built as a portfolio project. Event-driven architec
 7. payment-service consumes the event, simulates payment (80% success)
 8. `PaymentSucceededEvent` or `PaymentFailedEvent` published to Kafka
 9. order-service consumes the payment result and updates order status to `PAID` or `PAYMENT_FAILED`
+10. order-service broadcasts status via WebSocket to `/topic/orders/{orderId}`
+11. Vue.js frontend receives live update via STOMP subscription
 
 ## Services & Ports
 
@@ -59,7 +61,7 @@ Full-stack e-commerce system built as a portfolio project. Event-driven architec
 
 - **Backend:** Java 25, Spring Boot 4.0.1, Spring Data JPA, Spring Security, Spring Kafka
 - **Auth:** JWT (jjwt 0.12.6), BCrypt password hashing
-- **Frontend:** Vue 3, TypeScript, Vite, Pinia, Vue Router, Tailwind CSS, PrimeVue _(in progress)_
+- **Frontend:** Vue 3, TypeScript, Vite, Pinia, Vue Router, Axios, @stomp/stompjs
 - **Database:** PostgreSQL (one DB per service)
 - **Messaging:** Apache Kafka 3.7.0
 - **Infrastructure:** Docker Compose
@@ -199,7 +201,7 @@ All sensitive values are configured via environment variables with local default
 - [x] JWT authentication — user-service with register/login
 - [x] JWT validation filter in order-service and product-service
 - [x] Environment variable configuration
-- [ ] Vue.js frontend (products, cart, orders)
+- [x] Vue.js frontend (products, cart, orders, live order status via WebSocket)
 - [x] WebSocket real-time order status updates (STOMP `/ws`, broadcasts to `/topic/orders/{id}`)
 - [ ] Full Docker Compose (all services + frontend)
 - [ ] Tests (unit, web layer, Kafka integration)
