@@ -1,12 +1,43 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useOrderStore } from '@/stores/orderStore'
 import OrderStatusBadge from '@/components/OrderStatusBadge.vue'
+import { Client } from '@stomp/stompjs'
+import type { OrderStatusUpdate } from '@/types'
 
 const orderStore = useOrderStore()
 
-onMounted(() => {
-  orderStore.fetchOrders()
+// WebSocket: listen for status updates on all orders
+let client: Client | null = null
+
+function connectWebSocket() {
+  client = new Client({
+    brokerURL: 'ws://localhost:8082/ws',
+    reconnectDelay: 5000,
+    onConnect: () => {
+      // Subscribe to each CREATED order's topic
+      for (const order of orderStore.orders) {
+        if (order.status === 'CREATED') {
+          client!.subscribe(`/topic/orders/${order.id}`, (message) => {
+            const update: OrderStatusUpdate = JSON.parse(message.body)
+            orderStore.updateOrderStatus(update.orderId, update.status)
+          })
+        }
+      }
+    },
+  })
+  client.activate()
+}
+
+onMounted(async () => {
+  await orderStore.fetchOrders()
+  connectWebSocket()
+})
+
+onUnmounted(() => {
+  if (client) {
+    client.deactivate()
+  }
 })
 </script>
 

@@ -15,7 +15,7 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 
 // WebSocket subscription — listens for live status updates
-const { status: liveStatus } = useOrderStatus(orderId)
+const { status: liveStatus, connected } = useOrderStatus(orderId)
 
 // When a WebSocket update arrives, update the order status
 watch(liveStatus, (newStatus) => {
@@ -67,6 +67,7 @@ onMounted(async () => {
 
       <p v-if="order.status === 'CREATED'" class="waiting-msg">
         Waiting for payment confirmation...
+        <span class="connection-dot" :class="connected ? 'online' : 'offline'" />
       </p>
     </template>
   </div>
@@ -133,6 +134,23 @@ onMounted(async () => {
   margin-top: 1.5rem;
   color: #f59e0b;
   font-style: italic;
+}
+
+.connection-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.connection-dot.online {
+  background: #22c55e;
+}
+
+.connection-dot.offline {
+  background: #ef4444;
 }
 
 .error {
