@@ -39,7 +39,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        var token = authHeader.substring(7); // αφαίρεση του "Bearer " prefix
+        var token = authHeader.substring(7); // strip "Bearer " prefix
 
         try {
             Claims claims = Jwts.parser()
