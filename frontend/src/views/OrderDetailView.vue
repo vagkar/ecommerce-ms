@@ -14,10 +14,8 @@ const order = ref<Order | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 
-// WebSocket subscription — listens for live status updates
 const { status: liveStatus, connected } = useOrderStatus(orderId)
 
-// When a WebSocket update arrives, update the order status
 watch(liveStatus, (newStatus) => {
   if (newStatus && order.value) {
     order.value.status = newStatus as OrderStatus
@@ -36,23 +34,23 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="order-detail-page">
+  <div class="page-narrow">
     <h1>Order Detail</h1>
     <p v-if="loading">Loading...</p>
-    <p v-else-if="error" class="error">{{ error }}</p>
+    <p v-else-if="error" class="text-error">{{ error }}</p>
     <template v-else-if="order">
       <div class="order-info">
         <div class="info-row">
-          <span class="label">Order ID:</span>
-          <span class="mono">{{ order.id }}</span>
+          <span class="text-muted">Order ID:</span>
+          <span class="text-mono">{{ order.id }}</span>
         </div>
         <div class="info-row">
-          <span class="label">Status:</span>
+          <span class="text-muted">Status:</span>
           <OrderStatusBadge :status="order.status" />
         </div>
         <div class="info-row">
-          <span class="label">Total:</span>
-          <span class="total">€{{ order.total.toFixed(2) }}</span>
+          <span class="text-muted">Total:</span>
+          <span class="total">&euro;{{ order.total.toFixed(2) }}</span>
         </div>
       </div>
 
@@ -60,8 +58,8 @@ onMounted(async () => {
       <div class="items-list">
         <div v-for="item in order.items" :key="item.productId" class="item-row">
           <span>{{ item.productName }}</span>
-          <span>€{{ item.unitPrice.toFixed(2) }} × {{ item.quantity }}</span>
-          <span class="item-price">€{{ item.lineTotal.toFixed(2) }}</span>
+          <span>&euro;{{ item.unitPrice.toFixed(2) }} &times; {{ item.quantity }}</span>
+          <span class="item-price">&euro;{{ item.lineTotal.toFixed(2) }}</span>
         </div>
       </div>
 
@@ -72,88 +70,3 @@ onMounted(async () => {
     </template>
   </div>
 </template>
-
-<style scoped>
-.order-detail-page {
-  padding: 2rem;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.order-info {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-}
-
-.label {
-  color: #64748b;
-}
-
-.mono {
-  font-family: monospace;
-  font-size: 0.9rem;
-}
-
-.total {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-
-.items-list {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.item-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.item-row:last-child {
-  border-bottom: none;
-}
-
-.item-price {
-  font-weight: bold;
-}
-
-.waiting-msg {
-  margin-top: 1.5rem;
-  color: #f59e0b;
-  font-style: italic;
-}
-
-.connection-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-left: 0.5rem;
-  vertical-align: middle;
-}
-
-.connection-dot.online {
-  background: #22c55e;
-}
-
-.connection-dot.offline {
-  background: #ef4444;
-}
-
-.error {
-  color: #ef4444;
-}
-</style>

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 import { useOrderStore } from '@/stores/orderStore'
-import OrderStatusBadge from '@/components/OrderStatusBadge.vue'
+import OrderCard from '@/components/OrderCard.vue'
 import { Client } from '@stomp/stompjs'
 import type { OrderStatusUpdate } from '@/types'
 
 const orderStore = useOrderStore()
 
-// WebSocket: listen for status updates on all orders
 let client: Client | null = null
 
 function connectWebSocket() {
@@ -15,7 +14,6 @@ function connectWebSocket() {
     brokerURL: 'ws://localhost:8082/ws',
     reconnectDelay: 5000,
     onConnect: () => {
-      // Subscribe to each CREATED order's topic
       for (const order of orderStore.orders) {
         if (order.status === 'CREATED') {
           client!.subscribe(`/topic/orders/${order.id}`, (message) => {
@@ -31,7 +29,6 @@ function connectWebSocket() {
 
 async function goToPage(page: number) {
   await orderStore.fetchOrders(page)
-  // Reconnect WebSocket to subscribe to new page's CREATED orders
   if (client) {
     client.deactivate()
   }
@@ -51,122 +48,25 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="orders-page">
+  <div class="page">
     <h1>My Orders</h1>
     <p v-if="orderStore.loading">Loading orders...</p>
-    <p v-else-if="orderStore.error" class="error">{{ orderStore.error }}</p>
+    <p v-else-if="orderStore.error" class="text-error">{{ orderStore.error }}</p>
     <p v-else-if="orderStore.orders.length === 0">No orders yet.</p>
     <div v-else class="order-list">
-      <RouterLink
-        v-for="order in orderStore.orders"
-        :key="order.id"
-        :to="`/orders/${order.id}`"
-        class="order-card"
-      >
-        <div class="order-header">
-          <span class="order-id">{{ order.id.slice(0, 8) }}...</span>
-          <OrderStatusBadge :status="order.status" />
-        </div>
-        <p class="order-total">€{{ order.total.toFixed(2) }}</p>
-        <p class="order-items">{{ order.items.length }} item(s)</p>
-      </RouterLink>
+      <OrderCard v-for="order in orderStore.orders" :key="order.id" :order="order" />
 
       <div v-if="orderStore.totalPages > 1" class="pagination">
-        <button :disabled="orderStore.isFirstPage" @click="goToPage(orderStore.currentPage - 1)">
-          ← Previous
+        <button class="btn btn-outline" :disabled="orderStore.isFirstPage" @click="goToPage(orderStore.currentPage - 1)">
+          &larr; Previous
         </button>
         <span class="page-info">
           Page {{ orderStore.currentPage + 1 }} of {{ orderStore.totalPages }}
         </span>
-        <button :disabled="orderStore.isLastPage" @click="goToPage(orderStore.currentPage + 1)">
-          Next →
+        <button class="btn btn-outline" :disabled="orderStore.isLastPage" @click="goToPage(orderStore.currentPage + 1)">
+          Next &rarr;
         </button>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.orders-page {
-  padding: 2rem;
-}
-
-.order-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 700px;
-}
-
-.order-card {
-  display: block;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 1rem 1.5rem;
-  text-decoration: none;
-  color: inherit;
-}
-
-.order-card:hover {
-  border-color: #3b82f6;
-}
-
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.order-id {
-  font-family: monospace;
-  color: #64748b;
-}
-
-.order-total {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin: 0.5rem 0 0;
-}
-
-.order-items {
-  color: #64748b;
-  margin: 0.25rem 0 0;
-}
-
-.error {
-  color: #ef4444;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-.pagination button {
-  padding: 0.5rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background: white;
-  cursor: pointer;
-}
-
-.pagination button:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #3b82f6;
-}
-
-.pagination button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.page-info {
-  color: #64748b;
-  font-size: 0.9rem;
-}
-</style>

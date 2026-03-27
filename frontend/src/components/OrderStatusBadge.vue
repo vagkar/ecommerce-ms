@@ -17,14 +17,3 @@ const statusColors: Record<OrderStatus, string> = {
     {{ status }}
   </span>
 </template>
-
-<style scoped>
-.badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  color: white;
-  font-size: 0.8rem;
-  font-weight: bold;
-}
-</style>

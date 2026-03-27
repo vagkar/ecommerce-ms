@@ -1,0 +1,494 @@
+/* ========================================
+   CSS Variables — Design Tokens
+   ======================================== */
+
+:root {
+  /* Colors */
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-success: #22c55e;
+  --color-success-hover: #16a34a;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-disabled: #94a3b8;
+
+  /* Neutrals */
+  --color-bg: #f8fafc;
+  --color-bg-card: #ffffff;
+  --color-bg-nav: #1e293b;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-text-nav: #94a3b8;
+  --color-border: #e2e8f0;
+  --color-border-hover: #f1f5f9;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-full: 20px;
+
+  /* Widths */
+  --max-width-narrow: 400px;
+  --max-width-content: 700px;
+
+  /* Shadows */
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================
+   Global Reset & Base
+   ======================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* ========================================
+   Typography Utilities
+   ======================================== */
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-mono {
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.text-error {
+  color: var(--color-danger);
+}
+
+.text-bold {
+  font-weight: bold;
+}
+
+/* ========================================
+   Layout Utilities
+   ======================================== */
+
+.page {
+  padding: var(--space-xl);
+}
+
+.page-narrow {
+  padding: var(--space-xl);
+  max-width: var(--max-width-content);
+  margin: 0 auto;
+}
+
+.page-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+}
+
+/* ========================================
+   Cards
+   ======================================== */
+
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.card-shadow {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-xl);
+}
+
+.card-link {
+  display: block;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  text-decoration: none;
+  color: inherit;
+}
+
+.card-link:hover {
+  border-color: var(--color-primary);
+}
+
+/* ========================================
+   Buttons
+   ======================================== */
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s;
+}
+
+.btn:disabled {
+  background: var(--color-disabled);
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: var(--color-success-hover);
+}
+
+.btn-danger-outline {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+}
+
+.btn-outline {
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--color-border-hover);
+  border-color: var(--color-primary);
+}
+
+.btn-outline:disabled {
+  opacity: 0.4;
+  background: var(--color-bg-card);
+}
+
+.btn-lg {
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+}
+
+.btn-sm {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+/* ========================================
+   Forms
+   ======================================== */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.input {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+}
+
+/* ========================================
+   Status & Indicators
+   ======================================== */
+
+.badge {
+  display: inline-block;
+  padding: var(--space-xs) 0.75rem;
+  border-radius: var(--radius-full);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.connection-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: var(--space-sm);
+  vertical-align: middle;
+}
+
+.connection-dot.online {
+  background: var(--color-success);
+}
+
+.connection-dot.offline {
+  background: var(--color-danger);
+}
+
+/* ========================================
+   Navbar
+   ======================================== */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-xl);
+  background: var(--color-bg-nav);
+  color: white;
+}
+
+.navbar a {
+  color: var(--color-text-nav);
+  text-decoration: none;
+  margin-right: var(--space-lg);
+}
+
+.navbar a:hover,
+.navbar a.router-link-active {
+  color: white;
+}
+
+.nav-brand {
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: white !important;
+}
+
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.cart-link {
+  background: var(--color-primary);
+  color: white !important;
+  padding: 0.4rem var(--space-md);
+  border-radius: var(--radius-sm);
+}
+
+.logout-btn {
+  background: transparent;
+  color: var(--color-text-nav);
+  border: 1px solid var(--color-text-nav);
+  padding: 0.4rem var(--space-md);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  color: white;
+  border-color: white;
+}
+
+/* ========================================
+   Auth Pages (Login / Register)
+   ======================================== */
+
+.auth-card {
+  width: 100%;
+  max-width: var(--max-width-narrow);
+}
+
+.auth-card h2 {
+  margin: 0 0 var(--space-lg);
+  text-align: center;
+}
+
+.switch-link {
+  text-align: center;
+  margin-top: var(--space-md);
+}
+
+/* ========================================
+   Products
+   ======================================== */
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--space-lg);
+}
+
+.product-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.product-card h3 {
+  margin: 0;
+}
+
+.product-price {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.inactive-badge {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+.add-btn {
+  margin-top: auto;
+}
+
+/* ========================================
+   Cart
+   ======================================== */
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.cart-item h3 {
+  margin: 0;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.item-total {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.cart-footer {
+  margin-top: var(--space-xl);
+  text-align: right;
+}
+
+.total {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* ========================================
+   Orders
+   ======================================== */
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: var(--max-width-content);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-total {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: var(--space-sm) 0 0;
+}
+
+.order-items-count {
+  margin: var(--space-xs) 0 0;
+}
+
+/* ========================================
+   Order Detail
+   ======================================== */
+
+.order-info {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) 0;
+}
+
+.items-list {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.item-price {
+  font-weight: bold;
+}
+
+.waiting-msg {
+  margin-top: var(--space-lg);
+  color: var(--color-warning);
+  font-style: italic;
+}
+
+/* ========================================
+   Pagination
+   ======================================== */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.page-info {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
