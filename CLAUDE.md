@@ -92,6 +92,7 @@ POST /orders (order-service) — requires JWT in Authorization header
 | `GET /products`, `GET /products/{id}` | No |
 | `POST/PUT/PATCH /products/**` | Yes |
 | All `/orders/**` | Yes |
+| All `/cart/**` | Yes |
 | `POST /auth/register`, `POST /auth/login` | No |
 
 ### Key Classes
@@ -106,6 +107,8 @@ POST /orders (order-service) — requires JWT in Authorization header
 | order-service | `PaymentEventsListener` | `@KafkaListener` on `payment.succeeded` + `payment.failed`, triggers WebSocket broadcast |
 | order-service | `WebSocketConfig` | STOMP endpoint `/ws`, topic prefix `/topic` |
 | order-service | `OrderStatusBroadcaster` | Broadcasts order status to `/topic/orders/{orderId}` via `SimpMessagingTemplate` |
+| order-service | `CartController` | REST API for cart CRUD (`/cart/**`) |
+| order-service | `CartService` | Cart business logic with getOrCreate pattern |
 | payment-service | `OrderEventsListener` | `@KafkaListener` on `order.events`, consumer group `payment-service` |
 | payment-service | `PaymentEventPublisher` | Publishes succeeded/failed events |
 | product-service | `JwtAuthFilter` | Validates JWT on every request |
@@ -177,7 +180,8 @@ src/
 |---|---|
 | `api/axios.ts` | Axios instances with JWT interceptor |
 | `stores/authStore.ts` | JWT token, login/logout, localStorage persistence |
-| `stores/cartStore.ts` | Cart items, add/remove, computed totals, localStorage persistence |
+| `api/cartApi.ts` | Cart API client (CRUD operations against `/cart`) |
+| `stores/cartStore.ts` | Cart state, localStorage + backend sync (local-first strategy) |
 | `stores/orderStore.ts` | Orders list, place order, status updates |
 | `composables/useOrderStatus.ts` | STOMP WebSocket subscription per order (auto-reconnect) |
 | `router/index.ts` | Routes + `beforeEach` auth guard (saves redirect destination) |
@@ -185,7 +189,7 @@ src/
 
 ### Key Frontend Behaviors
 
-- **Cart persistence:** `cartStore` uses `watch` with `deep: true` to sync cart items to `localStorage` on every change
+- **Cart persistence:** Local-first strategy — `cartStore` syncs to `localStorage` (watch + deep:true) and to backend API when logged in. `syncWithBackend()` merges local + server cart on login
 - **Login redirect:** Router guard saves the intended destination as `?redirect=` query param; `LoginView`/`RegisterView` redirect back after auth
 - **Order items:** `OrderItem` entity stores `productName` as a snapshot at order time (not looked up from product-service)
 - **Live status in list:** `OrdersView` opens a single STOMP connection and subscribes to all CREATED orders for live status updates

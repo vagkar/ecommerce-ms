@@ -207,6 +207,7 @@ All sensitive values are configured via environment variables with local default
 - [x] Login redirect to intended page after authentication
 - [x] Cart persistence via localStorage
 - [x] WebSocket auto-reconnect with connection indicator
-- [ ] Pagination UI for orders list
+- [x] Pagination UI for orders list
+- [x] Backend cart API with frontend sync (local-first + database persistence)
 - [ ] Full Docker Compose (all services + frontend)
 - [ ] Tests (unit, web layer, Kafka integration)

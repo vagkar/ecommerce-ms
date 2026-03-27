@@ -51,6 +51,16 @@ export interface CreateOrderRequest {
   items: CreateOrderItemRequest[]
 }
 
+// Maps to CartResponse / CartItemResponse DTOs in order-service
+export interface CartItemResponse {
+  productId: string
+  quantity: number
+}
+
+export interface CartResponse {
+  items: CartItemResponse[]
+}
+
 // Maps to Spring Page<T> response
 export interface PageResponse<T> {
   content: T[]

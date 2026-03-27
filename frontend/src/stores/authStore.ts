@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { login as apiLogin, register as apiRegister } from '@/api/authApi'
 import type { LoginRequest, RegisterRequest } from '@/types'
+import { useCartStore } from '@/stores/cartStore'
 import axios from 'axios'
 
 function getErrorMessage(e: unknown, fallback: string): string {
@@ -28,6 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await apiLogin(data)
       token.value = response.token
       localStorage.setItem('token', response.token)
+      await useCartStore().syncWithBackend()
     } catch (e: unknown) {
       error.value = getErrorMessage(e, 'Login failed')
       throw e
@@ -43,6 +45,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await apiRegister(data)
       token.value = response.token
       localStorage.setItem('token', response.token)
+      await useCartStore().syncWithBackend()
     } catch (e: unknown) {
       error.value = getErrorMessage(e, 'Registration failed')
       throw e

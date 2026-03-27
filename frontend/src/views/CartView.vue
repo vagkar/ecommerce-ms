@@ -19,7 +19,7 @@ async function placeOrder() {
         quantity: item.quantity,
       })),
     })
-    cartStore.clear()
+    await cartStore.clear()
     // Navigate to order detail page for live status tracking
     router.push(`/orders/${order.id}`)
   } catch {
