@@ -51,6 +51,16 @@ export interface CreateOrderRequest {
   items: CreateOrderItemRequest[]
 }
 
+// Maps to Spring Page<T> response
+export interface PageResponse<T> {
+  content: T[]
+  totalElements: number
+  totalPages: number
+  number: number // current page (0-indexed)
+  first: boolean
+  last: boolean
+}
+
 // WebSocket message — sent by OrderStatusBroadcaster
 export interface OrderStatusUpdate {
   orderId: string

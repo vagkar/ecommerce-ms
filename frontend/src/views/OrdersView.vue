@@ -29,6 +29,15 @@ function connectWebSocket() {
   client.activate()
 }
 
+async function goToPage(page: number) {
+  await orderStore.fetchOrders(page)
+  // Reconnect WebSocket to subscribe to new page's CREATED orders
+  if (client) {
+    client.deactivate()
+  }
+  connectWebSocket()
+}
+
 onMounted(async () => {
   await orderStore.fetchOrders()
   connectWebSocket()
@@ -61,6 +70,18 @@ onUnmounted(() => {
         <p class="order-total">€{{ order.total.toFixed(2) }}</p>
         <p class="order-items">{{ order.items.length }} item(s)</p>
       </RouterLink>
+
+      <div v-if="orderStore.totalPages > 1" class="pagination">
+        <button :disabled="orderStore.isFirstPage" @click="goToPage(orderStore.currentPage - 1)">
+          ← Previous
+        </button>
+        <span class="page-info">
+          Page {{ orderStore.currentPage + 1 }} of {{ orderStore.totalPages }}
+        </span>
+        <button :disabled="orderStore.isLastPage" @click="goToPage(orderStore.currentPage + 1)">
+          Next →
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -114,5 +135,38 @@ onUnmounted(() => {
 
 .error {
   color: #ef4444;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pagination button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #3b82f6;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-info {
+  color: #64748b;
+  font-size: 0.9rem;
 }
 </style>

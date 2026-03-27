@@ -16,11 +16,24 @@ export const useOrderStore = defineStore('order', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchOrders() {
+  // Pagination state
+  const currentPage = ref(0)
+  const totalPages = ref(0)
+  const totalElements = ref(0)
+  const isFirstPage = ref(true)
+  const isLastPage = ref(true)
+
+  async function fetchOrders(page = 0) {
     loading.value = true
     error.value = null
     try {
-      orders.value = await apiGetOrders()
+      const pageResponse = await apiGetOrders(page)
+      orders.value = pageResponse.content
+      currentPage.value = pageResponse.number
+      totalPages.value = pageResponse.totalPages
+      totalElements.value = pageResponse.totalElements
+      isFirstPage.value = pageResponse.first
+      isLastPage.value = pageResponse.last
     } catch (e: unknown) {
       error.value = getErrorMessage(e, 'Failed to fetch orders')
     } finally {
@@ -51,5 +64,9 @@ export const useOrderStore = defineStore('order', () => {
     }
   }
 
-  return { orders, loading, error, fetchOrders, placeOrder, updateOrderStatus }
+  return {
+    orders, loading, error,
+    currentPage, totalPages, totalElements, isFirstPage, isLastPage,
+    fetchOrders, placeOrder, updateOrderStatus,
+  }
 })
