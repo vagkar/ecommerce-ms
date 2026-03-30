@@ -12,8 +12,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,7 +36,7 @@ class OrderControllerTest {
     private static final UUID USER_ID = UUID.randomUUID();
 
     // Simulate authenticated request matching JwtAuthFilter format
-    private static org.springframework.test.web.servlet.request.RequestPostProcessor authenticated() {
+    private static RequestPostProcessor authenticated() {
         var auth = new UsernamePasswordAuthenticationToken(
                 USER_ID.toString(),
                 null,
