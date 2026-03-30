@@ -34,7 +34,10 @@ Each service has its own Maven wrapper. Run commands from the repo root using `-
 ./mvnw -f services/order-service test
 
 # Run a single test class
-./mvnw -f services/order-service test -Dtest=OrderServiceApplicationTests
+./mvnw -f services/order-service test -Dtest=OrderServiceTest
+
+# Run all unit tests only (fast)
+./mvnw -f services/order-service test -Dtest="OrderServiceTest,CartServiceTest"
 
 # Build without tests
 ./mvnw -f services/product-service clean package -DskipTests

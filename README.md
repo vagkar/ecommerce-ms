@@ -209,5 +209,5 @@ All sensitive values are configured via environment variables with local default
 - [x] WebSocket auto-reconnect with connection indicator
 - [x] Pagination UI for orders list
 - [x] Backend cart API with frontend sync (local-first + database persistence)
+- [x] Tests — unit (Mockito), web layer (@SpringBootTest + MockMvc), Kafka integration (@EmbeddedKafka)
 - [ ] Full Docker Compose (all services + frontend)
-- [ ] Tests (unit, web layer, Kafka integration)
