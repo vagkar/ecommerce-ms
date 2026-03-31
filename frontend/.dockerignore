@@ -1,0 +1,8 @@
+node_modules
+dist
+# Exclude local dev env files — they contain localhost URLs that must NOT be baked
+# into the production bundle. In Docker, VITE vars are intentionally left unset
+# so axios falls back to relative paths, which nginx then proxies.
+.env
+.env.local
+.env.*.local

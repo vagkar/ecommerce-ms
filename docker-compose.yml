@@ -1,0 +1,142 @@
+services:
+
+  # ─── Infrastructure ───────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: ecommerce-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Runs once on first startup to create all three databases and users
+      - ./docker/init-postgres.sh:/docker-entrypoint-initdb.d/init.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: ecommerce-kafka
+    environment:
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      # PLAINTEXT: internal container-to-container traffic
+      # CONTROLLER: internal Kafka metadata traffic
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: ecommerce-kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  # ─── Backend Services ──────────────────────────────────────────────────────────
+
+  user-service:
+    build:
+      context: ./services/user-service
+    container_name: ecommerce-user-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/userdb
+      DB_USERNAME: "user"
+      DB_PASSWORD: user
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  product-service:
+    build:
+      context: ./services/product-service
+    container_name: ecommerce-product-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/productdb
+      DB_USERNAME: product
+      DB_PASSWORD: product
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  order-service:
+    build:
+      context: ./services/order-service
+    container_name: ecommerce-order-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/orderdb
+      DB_USERNAME: "order"
+      DB_PASSWORD: order
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      # Internal Docker DNS name — containers communicate over the Docker network
+      PRODUCT_SERVICE_URL: http://product-service:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      product-service:
+        condition: service_started
+
+  payment-service:
+    build:
+      context: ./services/payment-service
+    container_name: ecommerce-payment-service
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  # ─── Frontend ─────────────────────────────────────────────────────────────────
+
+  frontend:
+    build:
+      context: ./frontend
+      # No VITE build args needed — .env is excluded via .dockerignore so all
+      # VITE vars are undefined at build time. axios uses relative paths (/auth/,
+      # /products, etc.) and nginx proxies them to the correct backend container.
+    container_name: ecommerce-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - user-service
+      - product-service
+      - order-service
+
+volumes:
+  postgres-data:
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      # Lower MTU fixes SSL handshake failures on Windows Docker Desktop / WSL2.
+      # Default is 1500 but fragmented packets break TLS — 1400 is safe for most setups.
+      com.docker.network.driver.mtu: "1400"

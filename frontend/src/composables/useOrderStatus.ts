@@ -10,7 +10,9 @@ export function useOrderStatus(orderId: string) {
 
   function connect() {
     client = new Client({
-      brokerURL: 'ws://localhost:8082/ws',
+      // Local dev: VITE_WS_URL set in .env → connects directly to localhost:8082
+      // Docker: .env excluded → derives URL from current page host → nginx proxies /ws
+      brokerURL: import.meta.env.VITE_WS_URL || `ws://${location.host}/ws`,
       // Auto-reconnect: retry every 5 seconds if connection drops
       reconnectDelay: 5000,
       onConnect: () => {

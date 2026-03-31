@@ -210,4 +210,4 @@ All sensitive values are configured via environment variables with local default
 - [x] Pagination UI for orders list
 - [x] Backend cart API with frontend sync (local-first + database persistence)
 - [x] Tests — unit (Mockito), web layer (@SpringBootTest + MockMvc), Kafka integration (@EmbeddedKafka)
-- [ ] Full Docker Compose (all services + frontend)
+- [x] Full Docker Compose (all services + frontend via nginx reverse proxy)
