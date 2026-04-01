@@ -17,7 +17,8 @@ export const orderHttp = axios.create({
   baseURL: import.meta.env.VITE_ORDER_SERVICE_URL || '/api',
 })
 
-// Interceptor: automatically attaches JWT token to every request
+// Attaches JWT token to every request.
+// Not applied to authHttp — login/register don't need a token.
 function addAuthInterceptor(instance: ReturnType<typeof axios.create>) {
   instance.interceptors.request.use((config) => {
     const token = localStorage.getItem('token')
@@ -30,3 +31,22 @@ function addAuthInterceptor(instance: ReturnType<typeof axios.create>) {
 
 addAuthInterceptor(productHttp)
 addAuthInterceptor(orderHttp)
+
+// Called from main.ts after the router is ready.
+// Handles 401 responses by clearing the token and navigating to /login via the router
+// (client-side navigation, no full page reload).
+// Not applied to authHttp — a failed login also returns 401 and must not cause a redirect.
+export function setupResponseInterceptors(router: { push: (to: string) => void }) {
+  for (const instance of [productHttp, orderHttp]) {
+    instance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token')
+          router.push('/login')
+        }
+        return Promise.reject(error)
+      },
+    )
+  }
+}

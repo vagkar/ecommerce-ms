@@ -2,6 +2,16 @@
 
 A full-stack e-commerce system built as a portfolio project. Four Spring Boot microservices communicate asynchronously via Apache Kafka, secured with JWT authentication, and served through a Vue.js frontend.
 
+## Screenshots
+
+| Products | Cart | Orders |
+|----------|------|--------|
+| ![Products](docs/screenshots/products.png) | ![Cart](docs/screenshots/cart.png) | ![Orders](docs/screenshots/orders.png) |
+
+### Live Order Status (WebSocket)
+
+![Live order status](docs/screenshots/order_live_status.gif)
+
 ## Architecture
 
 ```
