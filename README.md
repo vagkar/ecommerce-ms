@@ -16,9 +16,9 @@ A full-stack e-commerce system built as a portfolio project. Four Spring Boot mi
 
 ```
                         ┌─────────────────────────────┐
-                        │      Vue.js Frontend         │
-                        │   nginx (port 80)            │
-                        │   /api/* → backend services  │
+                        │      Vue.js Frontend        │
+                        │   nginx (port 80)           │
+                        │   /api/* → backend services │
                         └──────────┬──────────────────┘
                                    │ JWT
               ┌────────────────────┼────────────────────┐
